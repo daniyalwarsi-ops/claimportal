@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian — Claims Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ===================== AUTH SCREEN ===================== -->
+<div class="auth-screen" id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="brand-mark">M</div>
+      <div>
+        <div class="auth-title">Meridian</div>
+        <div class="auth-sub">Claims Ledger</div>
+      </div>
+    </div>
+
+    <!-- Sign in -->
+    <div id="auth-signin">
+      <h3>Sign in</h3>
+      <div class="field full"><label>Email</label><input type="email" id="auth-email" placeholder="you@company.com"></div>
+      <div class="field full"><label>Password</label><input type="password" id="auth-password" placeholder="••••••••"></div>
+      <div class="auth-msg error" id="auth-error"></div>
+      <button class="btn btn-primary" id="auth-signin-btn">Sign in</button>
+      <div class="auth-links">
+        <a href="#" id="show-forgot">Forgot password?</a>
+        <a href="#" id="show-signup">Create an account</a>
+      </div>
+    </div>
+
+    <!-- Create account -->
+    <div id="auth-signup" style="display:none;">
+      <h3>Create account</h3>
+      <div class="field full"><label>Email</label><input type="email" id="signup-email" placeholder="you@company.com"></div>
+      <div class="field full"><label>Password</label><input type="password" id="signup-password" placeholder="At least 6 characters"></div>
+      <div class="auth-msg error" id="signup-error"></div>
+      <div class="auth-msg success" id="signup-success"></div>
+      <button class="btn btn-primary" id="auth-signup-btn">Create account</button>
+      <div class="auth-links"><a href="#" id="show-signin-a">Back to sign in</a></div>
+    </div>
+
+    <!-- Forgot password -->
+    <div id="auth-forgot" style="display:none;">
+      <h3>Reset your password</h3>
+      <p class="auth-hint">Enter your email and we'll send you a link to set a new password.</p>
+      <div class="field full"><label>Email</label><input type="email" id="forgot-email" placeholder="you@company.com"></div>
+      <div class="auth-msg error" id="forgot-error"></div>
+      <div class="auth-msg success" id="forgot-success"></div>
+      <button class="btn btn-primary" id="auth-forgot-btn">Send reset link</button>
+      <div class="auth-links"><a href="#" id="show-signin-b">Back to sign in</a></div>
+    </div>
+
+    <!-- Set new password (arrived via emailed reset link) -->
+    <div id="auth-update-password" style="display:none;">
+      <h3>Set a new password</h3>
+      <p class="auth-hint">You clicked a password reset link — choose a new password below.</p>
+      <div class="field full"><label>New password</label><input type="password" id="update-password" placeholder="At least 6 characters"></div>
+      <div class="auth-msg error" id="update-error"></div>
+      <button class="btn btn-primary" id="auth-update-btn">Update password</button>
+    </div>
+  </div>
+</div>
+
+<div class="app" id="app-root" style="display:none;">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">M</div>
+      <div class="brand-text">
+        <div class="name">Meridian</div>
+        <div class="tag">Claims Ledger</div>
+      </div>
+    </div>
+
+    <!-- client switcher -->
+    <div class="client-switcher">
+      <button class="client-current" id="client-toggle">
+        <span class="client-avatar" id="client-avatar-current">A</span>
+        <span class="client-info">
+          <span class="client-name" id="client-name-label">Loading…</span>
+          <span class="client-role">Active client</span>
+        </span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="client-dropdown" id="client-dropdown">
+        <div class="client-dropdown-list" id="client-dropdown-list"></div>
+        <div class="client-dropdown-add" id="client-dropdown-add">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Add new client
+        </div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-item active" data-view="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" data-view="claims">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M9 12h6M9 16h6M9 8h3"/></svg>
+        Claims
+        <span class="count" id="nav-claims-count">0</span>
+      </div>
+      <div class="nav-item" data-view="providers">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z"/></svg>
+        Providers
+      </div>
+      <div class="nav-item" data-view="clients">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6.2 6.5-6.2S15.5 16.4 15.5 20"/><circle cx="17" cy="8.5" r="2.6"/><path d="M17.2 13.9c2.8.4 4.3 2.6 4.3 5.6"/></svg>
+        Clients
+      </div>
+      <div class="nav-item" data-view="reports">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 20V10M10 20V4M17 20v-7"/></svg>
+        Reports
+      </div>
+    </nav>
+    <div class="sidebar-foot">
+      Signed in as <b id="current-user-email">A. Farooqi</b><br>
+      <a href="#" id="sign-out-link" style="display:none;">Sign out</a>
+      <div style="margin-top:10px;">
+        <a href="#" id="reset-data-link" style="color:#8E9BB5;">Reset to sample data</a>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-titles">
+        <h1>Claims Dashboard</h1>
+        <div class="topbar-sub" id="topbar-client-sub">Managing claims for…</div>
+      </div>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="global-search" placeholder="Search claim #, policyholder, provider…">
+      </div>
+      <span class="sync-pill" id="sync-pill"><span class="sync-dot"></span><span id="sync-pill-text">Checking…</span></span>
+      <button class="btn btn-primary" id="open-new-claim">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+        New Claim
+      </button>
+    </div>
+
+    <div class="sync-banner" id="sync-banner">
+      <span id="sync-banner-text">Running in local-only mode — this device's data won't appear on your other devices.</span>
+      <span class="sync-banner-hint">Add your Supabase credentials in <code>config.js</code> to sync across devices — see SETUP.md.</span>
+    </div>
+
+    <!-- ===================== DASHBOARD ===================== -->
+    <section class="view active" id="view-dashboard">
+      <div class="stat-row" id="stat-row"></div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Claims by status</h3>
+            <span class="hint" id="donut-total-hint"></span>
+          </div>
+          <div class="donut-wrap">
+            <div class="donut" id="status-donut">
+              <div class="donut-center"><div class="n" id="donut-n">0</div><div class="t">total</div></div>
+            </div>
+            <div class="legend" id="status-legend"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Paid vs. pending, last 6 months</h3>
+            <span class="hint">Amount billed</span>
+          </div>
+          <div class="bars" id="month-bars"></div>
+        </div>
+      </div>
+
+      <div class="panel-head" style="margin-bottom:14px;">
+        <h3>Recent activity</h3>
+        <span class="hint">Last 6 claims touched</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Claim #</th><th>Policyholder</th><th>Provider</th><th>Submitted</th><th>Status</th><th style="text-align:right;">Amount</th></tr>
+          </thead>
+          <tbody id="recent-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== CLAIMS ===================== -->
+    <section class="view" id="view-claims">
+      <div class="filters">
+        <div class="chip active" data-status="all">All</div>
+        <div class="chip" data-status="Submitted">Submitted</div>
+        <div class="chip" data-status="Under Review">Under Review</div>
+        <div class="chip" data-status="Approved">Approved</div>
+        <div class="chip" data-status="Denied">Denied</div>
+        <div class="chip" data-status="Paid">Paid</div>
+        <span class="spacer"></span>
+        <span class="hint" id="claims-count-hint" style="font-size:12px;color:var(--ink-soft);"></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th data-sort="id">Claim # <span class="arrow">↕</span></th>
+              <th data-sort="policyholder">Policyholder <span class="arrow">↕</span></th>
+              <th data-sort="provider">Provider <span class="arrow">↕</span></th>
+              <th data-sort="service">Service</th>
+              <th data-sort="date">Service Date <span class="arrow">↕</span></th>
+              <th data-sort="submitted">Submitted <span class="arrow">↕</span></th>
+              <th data-sort="status">Status <span class="arrow">↕</span></th>
+              <th data-sort="amount" style="text-align:right;">Amount <span class="arrow">↕</span></th>
+            </tr>
+          </thead>
+          <tbody id="claims-body"></tbody>
+        </table>
+        <div class="empty-state" id="claims-empty" style="display:none;">
+          <div class="glyph">🗂</div>
+          <div class="title">No claims match this filter</div>
+          Try a different status or clear your search.
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PROVIDERS ===================== -->
+    <section class="view" id="view-providers">
+      <div class="panel-head" style="margin-bottom:14px;"><h3>Provider network</h3><span class="hint">By claim volume for this client</span></div>
+      <div class="provider-grid" id="provider-grid"></div>
+    </section>
+
+    <!-- ===================== CLIENTS ===================== -->
+    <section class="view" id="view-clients">
+      <div class="panel-head" style="margin-bottom:14px;"><h3>Clients</h3><span class="hint">Click a client to switch the whole workspace to their claims</span></div>
+      <div class="client-grid" id="client-grid"></div>
+    </section>
+
+    <!-- ===================== REPORTS ===================== -->
+    <section class="view" id="view-reports">
+      <div class="panel" style="margin-bottom:18px;">
+        <div class="panel-head"><h3>Monthly billed vs. paid</h3><span class="hint">Last 6 months</span></div>
+        <div class="bars" id="report-bars" style="height:190px;"></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Month</th><th style="text-align:right;">Claims Filed</th><th style="text-align:right;">Billed</th><th style="text-align:right;">Paid</th><th style="text-align:right;">Denied</th></tr></thead>
+          <tbody id="report-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ===================== NEW CLAIM MODAL ===================== -->
+<div class="modal-overlay" id="modal-new">
+  <div class="modal">
+    <div class="modal-torn"></div>
+    <div class="modal-head">
+      <h3 id="new-claim-modal-title">File a new claim</h3>
+      <button class="modal-close" data-close="modal-new">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-row">
+        <div class="field"><label>Policyholder name</label><input type="text" id="f-policyholder" placeholder="e.g. Sana Iqbal"></div>
+        <div class="field"><label>Member ID</label><input type="text" id="f-member" placeholder="e.g. MB-88213"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Service type</label>
+          <input type="text" id="f-service" placeholder="e.g. Office Visit">
+        </div>
+        <div class="field"><label>Date of service</label><input type="date" id="f-date"></div>
+      </div>
+      <div class="field-row">
+        <div class="field full"><label>Billed amount (PKR)</label><input type="number" id="f-amount" placeholder="0.00" min="0" step="0.01"></div>
+      </div>
+      <div class="field full">
+        <label>Notes for adjuster</label>
+        <textarea id="f-notes" placeholder="Optional context — symptoms, referral, prior authorization #, etc."></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" data-close="modal-new">Cancel</button>
+      <button class="btn btn-primary" id="submit-new-claim">Submit claim</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== NEW CLIENT MODAL ===================== -->
+<div class="modal-overlay" id="modal-new-client">
+  <div class="modal">
+    <div class="modal-torn"></div>
+    <div class="modal-head">
+      <h3 id="new-client-modal-title">Add a new client</h3>
+      <button class="modal-close" data-close="modal-new-client">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field full" style="margin-bottom:12px;">
+        <label>Client / payer name</label>
+        <input type="text" id="nc-name" placeholder="e.g. Northbridge Health Alliance">
+      </div>
+      <div class="field full" style="margin-bottom:12px;">
+        <label>Plan type</label>
+        <select id="nc-plan"></select>
+      </div>
+      <div class="field full">
+        <label>Workspace color</label>
+        <div class="swatch-row" id="nc-swatches"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" data-close="modal-new-client">Cancel</button>
+      <button class="btn btn-primary" id="submit-new-client">Add client</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DETAIL MODAL ===================== -->
+<div class="modal-overlay" id="modal-detail">
+  <div class="modal">
+    <div class="modal-torn"></div>
+    <div class="modal-head">
+      <h3>Claim detail</h3>
+      <button class="modal-close" data-close="modal-detail">✕</button>
+    </div>
+    <div class="modal-body" id="detail-body"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
